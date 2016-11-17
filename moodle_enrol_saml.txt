@@ -9,8 +9,7 @@ authentication infrastructure based on Security Assertion Markup Language
 Install Instruction
 -------------------------------------------------------------------------------
 
-  1. Unpack this saml directory into the /enrol/ directory as you would for any
-      Moodle enrol module
+  1. Unpack this saml directory into the /enrol/saml directory as you would for any Moodle enrol module
      (http://docs.moodle.org/en/Installing_contributed_modules_or_plugins).
 
   2. Login to Moodle as an administrator, and activate the module by navigating

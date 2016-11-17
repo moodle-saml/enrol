@@ -12,7 +12,7 @@ Requirements:
 This plugin require a simplesamlphp instance configured as SP
 (http://simplesamlphp.org/docs/trunk/simplesamlphp-sp)
 
-Tested in moodle2.0.3, 2.1.2, 2.2.3
+Tested in moodle 2.X and 3.1.3
 
 Install instructions:
 
