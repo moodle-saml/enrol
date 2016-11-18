@@ -1,9 +1,7 @@
 SAML Enrollments for Moodle
 -------------------------------------------------------------------------------
 
-SAML for Moodle is an open-source implementation for federated identity-based
-authentication infrastructure based on Security Assertion Markup Language
-(SAML) that allows the Moodle users log in through simpleSAMLphp.
+SAML for Moodle is an open-source implementation for federated identity-based authentication infrastructure based on Security Assertion Markup Language (SAML) that allows the Moodle users log in through simpleSAMLphp.
 
 
 Install Instruction
@@ -12,7 +10,7 @@ Install Instruction
   1. Unpack this saml directory into the /enrol/saml directory as you would for any Moodle enrol module
      (http://docs.moodle.org/en/Installing_contributed_modules_or_plugins).
 
-  2. Login to Moodle as an administrator, and activate the module by navigating
+  2. Login to Moodle as an administrator, and activate the module by navigating 
      Site administration->Plugins->Enrolments->Manage enrol plugins->SAML enrolments
 
 

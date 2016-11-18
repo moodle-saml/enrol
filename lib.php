@@ -169,56 +169,79 @@ class enrol_saml_plugin extends enrol_plugin {
 
         if($pluginconfig->supportcourses != 'nosupport' ) {
 
-	        if(!isset($pluginconfig->moodlecoursefieldid)) {
-		        $pluginconfig->moodlecoursefieldid = 'shortname';
-	        }
-	        try {
-                $plugin = enrol_get_plugin('saml');
-		        foreach($SAML_COURSE_INFO->mapped_roles as $role) {		       
-		            $moodle_role = $DB->get_record("role", array("shortname" =>$role));
-		            if($moodle_role) {
-			            $new_course_ids_with_role = array();
-			            $delete_course_ids_with_role = array();
-			            if (isset($SAML_COURSE_INFO->mapped_courses[$role])) {
-			                if(isset($SAML_COURSE_INFO->mapped_courses[$role]['active'])) {
-				                $new_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['active']);
-			                }
-			                if(isset($SAML_COURSE_INFO->mapped_courses[$role]['inactive'])) {
-				                $delete_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['inactive']);
-			                }
-			            }
-			            if(!$pluginconfig->ignoreinactivecourses) {
-			                foreach($delete_course_ids_with_role as $course_identify) {
-				                if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
-                                    $instance = $plugin->get_or_create_instance($course);
-                                    if(!empty($instance)) {
-                                        $plugin->unenrol_user($instance, $user->id);
-                                    }				                }
-			                }
-			            }
-			            foreach($new_course_ids_with_role as $course_identify) {
-			                if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
-                                $instance = $plugin->get_or_create_instance($course);
-                                if(empty($instance)) {
-                                    $err['enrollment'][] = get_string("error_instance_creation", "role_saml", $role, $course->id);
-                                }
-                                else {
-                                    $plugin->enrol_user($instance, $user->id, $moodle_role->id, 0, 0, 0); // last parameter (status) 0->active  1->suspended                        
-                                }
-			                }    
-			            }
-		            }
-		            else {
-			            $err['enrollment'][] = get_string("auth_saml_error_role_not_found", "auth_saml", $role);
-		            }
-		        }
-	        }
-	        catch (Exception $e) {
-		        $err['enrollment'][] = $e->getMessage();
-	        }
-	        unset($SAML_COURSE_INFO->mapped_courses);
-	        unset($SAML_COURSE_INFO->mapped_roles);
-	    }
+            if(!isset($pluginconfig->moodlecoursefieldid)) {
+                $pluginconfig->moodlecoursefieldid = 'shortname';
+            }
+            try {
+                  $plugin = enrol_get_plugin('saml');
+              foreach($SAML_COURSE_INFO->mapped_roles as $role) {		       
+                  $moodle_role = $DB->get_record("role", array("shortname" =>$role));
+                  if($moodle_role) {
+                      $new_course_ids_with_role = array();
+                      $delete_course_ids_with_role = array();
+                      if (isset($SAML_COURSE_INFO->mapped_courses[$role])) {
+                          if(isset($SAML_COURSE_INFO->mapped_courses[$role]['active'])) {
+                              $new_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['active']);
+                          }
+                          if(isset($SAML_COURSE_INFO->mapped_courses[$role]['inactive'])) {
+                              $delete_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['inactive']);
+                          }
+                      }
+                      if(!$pluginconfig->ignoreinactivecourses) {
+                          foreach($delete_course_ids_with_role as $course_identify) {
+                              if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
+                                  $instance = $plugin->get_or_create_instance($course);
+                                  if(!empty($instance)) {
+                                      $plugin->unenrol_user($instance, $user->id);
+                                  }
+                              }
+                          }
+                      }
+                      foreach($new_course_ids_with_role as $course_identify) {
+                          if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
+                              $instance = $plugin->get_or_create_instance($course);
+                              if(empty($instance)) {
+                                  $err['enrollment'][] = get_string("error_instance_creation", "role_saml", $role, $course->id);
+                              }
+                              else {
+                                  $plugin->enrol_user($instance, $user->id, $moodle_role->id, 0, 0, 0); // last parameter (status) 0->active  1->suspended                        
+                              }
+                          }    
+                      }
+                  }
+                  else {
+                      $err['enrollment'][] = get_string("auth_saml_error_role_not_found", "auth_saml", $role);
+                  }
+              }
+          }
+          catch (Exception $e) {
+            $err['enrollment'][] = $e->getMessage();
+          }
+          unset($SAML_COURSE_INFO->mapped_courses);
+          unset($SAML_COURSE_INFO->mapped_roles);
+      }
+    }
+
+    /**
+     * Is it possible to hide/show enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_hide_show_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/apply:config', $context);
+    }
+
+    /**
+     * Is it possible to delete enrol instance via standard UI?
+     *
+     * @param stdClass $instance
+     * @return bool
+     */
+    public function can_delete_instance($instance) {
+        $context = context_course::instance($instance->courseid);
+        return has_capability('enrol/apply:config', $context);
     }
 }
 
