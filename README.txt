@@ -4,6 +4,7 @@ license: http://www.gnu.org/copyleft/gpl.html GNU Public License
 
 Changes:
 - 2010-11    : Created by Yaco Sistemas.
+- 2019       : Updated to work with new version of moodle 3.5 (with new version ofmoodle-saml/auth)
 
 Requirements:
 - SimpleSAML (http://rnd.feide.no/simplesamlphp). Tested with version > 1.7
@@ -12,7 +13,7 @@ Requirements:
 This plugin require a simplesamlphp instance configured as SP
 (http://simplesamlphp.org/docs/trunk/simplesamlphp-sp)
 
-Tested in moodle 2.X and 3.1.3
+It works with 3.4 and 3.5.
 
 Install instructions:
 

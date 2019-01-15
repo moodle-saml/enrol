@@ -104,11 +104,11 @@ class enrol_saml_plugin extends enrol_plugin {
         $context = context_course::instance($courseid, MUST_EXIST);
 
         if (!has_capability('moodle/course:enrolconfig', $context) or !has_capability('enrol/saml:config', $context)) {
-            return NULL;
+            return null;
         }
 
         if ($DB->record_exists('enrol', array('courseid'=>$courseid, 'enrol'=>'saml'))) {
-            return NULL;
+            return null;
         }
 
         return new moodle_url('/enrol/saml/edit.php', array('courseid'=>$courseid));
@@ -130,12 +130,12 @@ class enrol_saml_plugin extends enrol_plugin {
      * @param array instance fields
      * @return int id of new instance, null if can not be created
      */
-    public function add_instance($course, array $fields = NULL) {
+    public function add_instance($course, array $fields=null) {
         global $DB;
 
         if ($DB->record_exists('enrol', array('courseid'=>$course->id, 'enrol'=>'saml'))) {
             // only one instance allowed, sorry
-            return NULL;
+            return null;
         }
 
         return parent::add_instance($course, $fields);
@@ -145,10 +145,10 @@ class enrol_saml_plugin extends enrol_plugin {
         $enrolinstances = enrol_get_instances($course->id, true);
         $instance = null;
         foreach ($enrolinstances as $courseenrolinstance) {
-          if ($courseenrolinstance->enrol == "saml") {
-              $instance = $courseenrolinstance;
-              break;
-          }
+            if ($courseenrolinstance->enrol == "saml") {
+                $instance = $courseenrolinstance;
+                break;
+            }
         }
         return $instance;
     }
@@ -162,64 +162,63 @@ class enrol_saml_plugin extends enrol_plugin {
     }
 
     public function sync_user_enrolments($user) {
-        // Configuration is in the auth/saml config file. (Not in the enrol/saml)
-        $pluginconfig = get_config('auth/saml');
+        // Configuration is in the auth_saml config file. (Not in the enrol/saml)
+        $pluginconfig = get_config('auth_saml');
         
         global $DB, $SAML_COURSE_INFO, $err;
 
-        if($pluginconfig->supportcourses != 'nosupport' ) {
-
-            if(!isset($pluginconfig->moodlecoursefieldid)) {
+        if ($pluginconfig->supportcourses != 'nosupport') {
+            if (!isset($pluginconfig->moodlecoursefieldid)) {
                 $pluginconfig->moodlecoursefieldid = 'shortname';
             }
             try {
-                  $plugin = enrol_get_plugin('saml');
-              foreach($SAML_COURSE_INFO->mapped_roles as $role) {		       
-                  $moodle_role = $DB->get_record("role", array("shortname" =>$role));
-                  if($moodle_role) {
-                      $new_course_ids_with_role = array();
-                      $delete_course_ids_with_role = array();
-                      if (isset($SAML_COURSE_INFO->mapped_courses[$role])) {
-                          if(isset($SAML_COURSE_INFO->mapped_courses[$role]['active'])) {
-                              $new_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['active']);
-                          }
-                          if(isset($SAML_COURSE_INFO->mapped_courses[$role]['inactive'])) {
-                              $delete_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['inactive']);
-                          }
-                      }
-                      if(!$pluginconfig->ignoreinactivecourses) {
-                          foreach($delete_course_ids_with_role as $course_identify) {
-                              if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
-                                  $instance = $plugin->get_or_create_instance($course);
-                                  if(!empty($instance)) {
-                                      $plugin->unenrol_user($instance, $user->id);
-                                  }
-                              }
-                          }
-                      }
-                      foreach($new_course_ids_with_role as $course_identify) {
-                          if($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
-                              $instance = $plugin->get_or_create_instance($course);
-                              if(empty($instance)) {
-                                  $err['enrollment'][] = get_string("error_instance_creation", "role_saml", $role, $course->id);
-                              }
-                              else {
-                                  $plugin->enrol_user($instance, $user->id, $moodle_role->id, 0, 0, 0); // last parameter (status) 0->active  1->suspended                        
-                              }
-                          }    
-                      }
-                  }
-                  else {
-                      $err['enrollment'][] = get_string("auth_saml_error_role_not_found", "auth_saml", $role);
-                  }
-              }
-          }
-          catch (Exception $e) {
-            $err['enrollment'][] = $e->getMessage();
-          }
-          unset($SAML_COURSE_INFO->mapped_courses);
-          unset($SAML_COURSE_INFO->mapped_roles);
-      }
+                $plugin = enrol_get_plugin('saml');
+                if (isset($SAML_COURSE_INFO) && !empty($SAML_COURSE_INFO->mapped_roles)) {
+                    foreach ($SAML_COURSE_INFO->mapped_roles as $role) {
+                        $moodle_role = $DB->get_record("role", array("shortname" =>$role));
+                        if ($moodle_role) {
+                            $new_course_ids_with_role = array();
+                            $delete_course_ids_with_role = array();
+                            if (isset($SAML_COURSE_INFO->mapped_courses[$role])) {
+                                if (isset($SAML_COURSE_INFO->mapped_courses[$role]['active'])) {
+                                    $new_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['active']);
+                                }
+                                if (isset($SAML_COURSE_INFO->mapped_courses[$role]['inactive'])) {
+                                    $delete_course_ids_with_role = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['inactive']);
+                                }
+                            }
+                            if (!$pluginconfig->ignoreinactivecourses) {
+                                foreach ($delete_course_ids_with_role as $course_identify) {
+                                    if ($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
+                                        $instance = $plugin->get_or_create_instance($course);
+                                        if (!empty($instance)) {
+                                            $plugin->unenrol_user($instance, $user->id);
+                                        }
+                                    }
+                                }
+                            }
+                            foreach ($new_course_ids_with_role as $course_identify) {
+                                if ($course = $DB->get_record("course", array($pluginconfig->moodlecoursefieldid => $course_identify))) {
+                                    $instance = $plugin->get_or_create_instance($course);
+                                    if (empty($instance)) {
+                                        $err['enrollment'][] = get_string("error_instance_creation", "role_saml", $role, $course->id);
+                                    } else {
+                                        $plugin->enrol_user($instance, $user->id, $moodle_role->id, 0, 0, 0);
+                                        // last parameter (status) 0->active  1->suspended
+                                    }
+                                }
+                            }
+                        } else {
+                            $err['enrollment'][] = get_string("auth_saml_error_role_not_found", "auth_saml", $role);
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                $err['enrollment'][] = $e->getMessage();
+            }
+            unset($SAML_COURSE_INFO->mapped_courses);
+            unset($SAML_COURSE_INFO->mapped_roles);
+        }
     }
 
     /**
@@ -253,8 +252,9 @@ class enrol_saml_plugin extends enrol_plugin {
  */
 function enrol_saml_supports($feature) {
     switch($feature) {
-        case ENROL_RESTORE_TYPE: return ENROL_RESTORE_EXACT;
-
-        default: return null;
+        case ENROL_RESTORE_TYPE:
+            return ENROL_RESTORE_EXACT;
+        default:
+            return null;
     }
 }
