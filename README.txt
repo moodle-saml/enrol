@@ -13,7 +13,7 @@ Requirements:
 This plugin require a simplesamlphp instance configured as SP
 (http://simplesamlphp.org/docs/trunk/simplesamlphp-sp)
 
-It works with 3.4 and 3.5.
+It works with 3.4, 3.5 and 3.6
 
 Install instructions:
 
