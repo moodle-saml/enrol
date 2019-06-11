@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * SAML enrol plugin installation script
+ * Self enrolment plugin settings and presets.
  *
  * @package    enrol
  * @subpackage saml
@@ -28,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_enrol_saml_install() {
     global $CFG;
 
-    // migrate settings
+    // Migrate settings.
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -26,20 +25,20 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-
-    //--- general settings -----------------------------------------------------------------------------------
+    // General settings.
     $settings->add(new admin_setting_heading('enrol_saml_settings', '', get_string('pluginname_desc', 'enrol_saml')));
 
-
-    //--- enrol instance defaults ----------------------------------------------------------------------------
+    // Enrol instance defaults.
     $settings->add(new admin_setting_heading('enrol_saml_defaults',
         get_string('enrolinstancedefaults', 'admin'), get_string('enrolinstancedefaults_desc', 'admin')));
 
     $settings->add(new admin_setting_configcheckbox('enrol_saml/defaultenrol',
         get_string('defaultenrol', 'enrol'), get_string('defaultenrol_desc', 'enrol'), 1));
 
-    $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                     ENROL_INSTANCE_DISABLED => get_string('no'));
+    $options = [
+        ENROL_INSTANCE_ENABLED  => get_string('yes'),
+        ENROL_INSTANCE_DISABLED => get_string('no')
+    ];
     $settings->add(new admin_setting_configselect('enrol_saml/status',
         get_string('status', 'enrol_saml'), get_string('status_desc', 'enrol_saml'), ENROL_INSTANCE_ENABLED, $options));
 

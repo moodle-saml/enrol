@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -30,20 +29,23 @@ require_once($CFG->libdir.'/formslib.php');
 
 class enrol_saml_edit_form extends moodleform {
 
-    function definition() {
+    public function definition() {
         $mform = $this->_form;
 
         list($instance, $plugin, $context) = $this->_customdata;
 
         $mform->addElement('header', 'header', get_string('pluginname', 'enrol_saml'));
 
-        $options = array(ENROL_INSTANCE_ENABLED  => get_string('yes'),
-                         ENROL_INSTANCE_DISABLED => get_string('no'));
+        $options = [
+            ENROL_INSTANCE_ENABLED  => get_string('yes'),
+            ENROL_INSTANCE_DISABLED => get_string('no')
+        ];
         $mform->addElement('select', 'status', get_string('status', 'enrol_saml'), $options);
         $mform->addHelpButton('status', 'status', 'enrol_saml');
         $mform->setDefault('status', $plugin->get_config('status'));
 
-        $mform->addElement('duration', 'enrolperiod', get_string('defaultperiod', 'enrol_saml'), array('optional' => true, 'defaultunit' => 86400));
+        $options = ['optional' => true, 'defaultunit' => 86400];
+        $mform->addElement('duration', 'enrolperiod', get_string('defaultperiod', 'enrol_saml'), $options);
         $mform->setDefault('enrolperiod', $plugin->get_config('enrolperiod'));
 
         if ($instance->id) {
