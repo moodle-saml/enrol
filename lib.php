@@ -200,13 +200,14 @@ class enrol_saml_plugin extends enrol_plugin {
 
     public function sync_user_enrolments($user) {
         // Configuration is in the auth_saml config file. (Not in the enrol/saml).
-        $pluginconfig = get_config('auth_saml');
+        $samlpluginconfig = get_config('auth_saml');
+        $enrolpluginconfig = get_config('enrol_saml');
 
         global $DB, $SAML_COURSE_INFO, $err;
 
-        if ($pluginconfig->supportcourses != 'nosupport') {
-            if (!isset($pluginconfig->moodlecoursefieldid)) {
-                $pluginconfig->moodlecoursefieldid = 'shortname';
+        if ($samlpluginconfig->supportcourses != 'nosupport') {
+            if (!isset($samlpluginconfig->moodlecoursefieldid)) {
+                $samlpluginconfig->moodlecoursefieldid = 'shortname';
             }
             try {
                 $plugin = enrol_get_plugin('saml');
@@ -224,29 +225,35 @@ class enrol_saml_plugin extends enrol_plugin {
                                     $delcourseids = array_keys($SAML_COURSE_INFO->mapped_courses[$role]['inactive']);
                                 }
                             }
-                            if (!$pluginconfig->ignoreinactivecourses) {
+                            if (!$samlpluginconfig->ignoreinactivecourses) {
                                 foreach ($delcourseids as $courseid) {
                                     // Check that is not listed on $newcourseids.
                                     if (in_array($courseid, $newcourseids)) {
                                         continue;
                                     }
 
-                                    if ($course = $DB->get_record("course", [$pluginconfig->moodlecoursefieldid => $courseid])) {
+                                    if ($course = $DB->get_record("course", [$samlpluginconfig->moodlecoursefieldid => $courseid])) {
                                         if ($course->id == SITEID) {
                                             continue;
                                         }
-                                        $instance = $plugin->get_or_create_instance($course);
-                                        if (!empty($instance)) {
-                                            $plugin->unenrol_user($instance, $user->id);
+                                        $context = context_course::instance($course->id);
+                                        if (user_has_role_assignment($user->id, $moodlerole->id, $context->id)) {
+                                            $instance = $plugin->get_or_create_instance($course);
+                                            if (!empty($instance)) {
+                                                $plugin->unenrol_user($instance, $user->id);
+                                                $this->enrol_saml_log_info($user->username.' unenrolled in course '.$course->shortname, $enrolpluginconfig->logfile);
+
+                                            }
                                         }
                                     }
                                 }
                             }
                             foreach ($newcourseids as $courseid) {
-                                if ($course = $DB->get_record("course", [$pluginconfig->moodlecoursefieldid => $courseid])) {
+                                if ($course = $DB->get_record("course", [$samlpluginconfig->moodlecoursefieldid => $courseid])) {
                                     if ($course->id == SITEID) {
                                         continue;
                                     }
+
                                     $instance = $plugin->get_or_create_instance($course);
                                     if (empty($instance)) {
                                         $err['enrollment'][] = get_string(
@@ -255,9 +262,15 @@ class enrol_saml_plugin extends enrol_plugin {
                                             $role,
                                             $course->id
                                         );
+                                        $this->enrol_saml_log_error("error enrolling ".$user->username.' with role '.$role.' on course '.$course->shortname, $enrolpluginconfig->logfile);
                                     } else {
-                                        $plugin->enrol_user($instance, $user->id, $moodlerole->id, 0, 0, 0);
-                                        // Last parameter (status) 0->active  1->suspended.
+                                        $context = context_course::instance($course->id);
+                                        if (!user_has_role_assignment($user->id, $moodlerole->id, $context->id)) {
+                                            $plugin->enrol_user($instance, $user->id, $moodlerole->id, 0, 0, 0);
+                                            $this->enrol_saml_log_info($user->username.' enrolled in course '.$course->shortname.' with role '.$role, $enrolpluginconfig->logfile);
+                                            // Last parameter (status) 0->active  1->suspended.
+                                        }
+                                        $this->assign_group($SAML_COURSE_INFO->mapped_courses[$role]['active'][$courseid], $course, $user, $enrolpluginconfig);
                                     }
                                 }
                             }
@@ -268,10 +281,73 @@ class enrol_saml_plugin extends enrol_plugin {
                 }
             } catch (Exception $e) {
                 $err['enrollment'][] = $e->getMessage();
+                $this->enrol_saml_log_error("Enrol process for user ".$user->username.' stopped.'.$e->getMessage(), $enrolpluginconfig->logfile);
             }
+
             unset($SAML_COURSE_INFO->mapped_courses);
             unset($SAML_COURSE_INFO->mapped_roles);
         }
+    }
+
+    public function assign_group($samlcourseinfo, $course, $user, $enrolpluginconfig) {
+        if ($course->groupmode) {
+            if (isset($samlcourseinfo['group'])) {
+                $groupname = $samlcourseinfo['group'];
+                if (isset($groupname)) {
+                    global $CFG;
+                    require_once("$CFG->dirroot/group/lib.php");
+                    $groupid = groups_get_group_by_name($course->id, $groupname);
+                    if ($groupid == false) {
+                        $newgroupdata = new stdClass();
+                        $newgroupdata->name = $groupname;
+                        $newgroupdata->courseid = $course->id;
+                        $newgroupdata->description = '';
+                        $groupid = groups_create_group($newgroupdata);
+                        $this->enrol_saml_log_info('Group '.$groupname.' created on course '.$course->shortname, $enrolpluginconfig->logfile);
+                    }
+                    $groups = groups_get_all_groups($course->id, $user->id);
+                    $found = false;
+                    foreach ($groups as $group) {
+                        if ($group->id == $groupid) {
+                            $found = true;
+                        } else {
+                            // Unassign from previous groups
+                            groups_remove_member($group->id, $user->id);
+                            $this->enrol_saml_log_info($user->username.' unassigned from group '.$group->name.' from course '.$course->shortname, $enrolpluginconfig->logfile);
+                        }
+                    }
+                    if (!$found) {
+                        groups_add_member($groupid, $user->id, 'enrol_saml');
+                        $this->enrol_saml_log_info($user->username.' assigned to group '.$groupname.' from course '.$course->shortname, $enrolpluginconfig->logfile);
+                    }
+                }
+            }
+        }
+    }
+
+    private function enrol_saml_log_error($msg, $logfile) {
+        $this->enrol_saml_write_in_log($msg, $logfile, 'error');
+    }
+
+    private function enrol_saml_log_info($msg, $logfile) {
+        $this->enrol_saml_write_in_log($msg, $logfile, 'info');
+    }
+
+    private function enrol_saml_write_in_log($msg, $logfile, $level = 'error') {
+        global $CFG;
+        if (isset($logfile) && !empty($logfile)) {
+            if (substr($logfile, 0) == '/') {
+                $destination = $logfile;
+            } else {
+                $destination = $CFG->dataroot . '/' . $logfile;
+            }
+            $msg = auth_saml_decorate_log($msg, $level);
+            file_put_contents($destination, $msg, FILE_APPEND);
+        }
+    }
+
+    private function auth_saml_decorate_log($msg, $level = "error") {
+        return $msg = date('D M d H:i:s  Y').' [client '.$_SERVER['REMOTE_ADDR'].'] ['.$level.'] '.$msg."\r\n";
     }
 
     /**

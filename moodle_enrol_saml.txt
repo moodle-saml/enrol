@@ -18,5 +18,6 @@ Configuration
 -------------------------------------------------------------------------------
      - Add instance to new courses: True
      - Enable saml enrolments: Enable True
+     - Log file
      - Default enrolment period: 0
      - Default role.    (Usually student)

@@ -4,6 +4,8 @@ license: http://www.gnu.org/copyleft/gpl.html GNU Public License
 
 Changes:
 - 2010-11    : Created by Yaco Sistemas.
+- 2011-19    : Maintained by Sixto Martin Garcia <sixto.martin.garcia@gmail.com>
+
 
 Requirements:
 - SimpleSAML (http://rnd.feide.no/simplesamlphp). Tested with version > 1.7
@@ -11,8 +13,6 @@ Requirements:
 
 This plugin require a simplesamlphp instance configured as SP
 (http://simplesamlphp.org/docs/trunk/simplesamlphp-sp)
-
-Tested in moodle 2.X and 3.1.3
 
 Install instructions:
 

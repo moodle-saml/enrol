@@ -26,30 +26,74 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
     // General settings.
-    $settings->add(new admin_setting_heading('enrol_saml_settings', '', get_string('pluginname_desc', 'enrol_saml')));
+    $settings->add(
+        new admin_setting_heading(
+            'enrol_saml_settings',
+            '',
+            get_string('pluginname_desc', 'enrol_saml')
+        )
+    );
 
     // Enrol instance defaults.
-    $settings->add(new admin_setting_heading('enrol_saml_defaults',
-        get_string('enrolinstancedefaults', 'admin'), get_string('enrolinstancedefaults_desc', 'admin')));
+    $settings->add(
+        new admin_setting_heading(
+            'enrol_saml_defaults',
+            get_string('enrolinstancedefaults', 'admin'),
+            get_string('enrolinstancedefaults_desc', 'admin')
+        )
+    );
 
-    $settings->add(new admin_setting_configcheckbox('enrol_saml/defaultenrol',
-        get_string('defaultenrol', 'enrol'), get_string('defaultenrol_desc', 'enrol'), 1));
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'enrol_saml/defaultenrol',
+            get_string('defaultenrol', 'enrol'),
+            get_string('defaultenrol_desc', 'enrol'),
+            1
+        )
+    );
 
     $options = [
         ENROL_INSTANCE_ENABLED  => get_string('yes'),
         ENROL_INSTANCE_DISABLED => get_string('no')
     ];
-    $settings->add(new admin_setting_configselect('enrol_saml/status',
-        get_string('status', 'enrol_saml'), get_string('status_desc', 'enrol_saml'), ENROL_INSTANCE_ENABLED, $options));
+    $settings->add(
+        new admin_setting_configselect(
+            'enrol_saml/status',
+            get_string('status', 'enrol_saml'),
+            get_string('status_desc', 'enrol_saml'),
+            ENROL_INSTANCE_ENABLED,
+            $options
+        )
+    );
 
-    $settings->add(new admin_setting_configtext('enrol_saml/enrolperiod',
-        get_string('defaultperiod', 'enrol_saml'), get_string('defaultperiod_desc', 'enrol_saml'), 0, PARAM_INT));
+    $title = get_string('logfile', 'enrol_saml');
+    $description = get_string('logfile_description', 'enrol_saml');
+    $default = '';
+    $setting = new admin_setting_configtext('enrol_saml/logfile', $title, $description, $default, PARAM_RAW);
+    $settings->add($setting);
+
+    $settings->add(
+        new admin_setting_configtext(
+            'enrol_saml/enrolperiod',
+            get_string('defaultperiod', 'enrol_saml'),
+            get_string('defaultperiod_desc', 'enrol_saml'),
+            0,
+            PARAM_INT
+        )
+    );
 
     if (!during_initial_install()) {
         $options = get_default_enrol_roles(context_system::instance());
         $student = get_archetype_roles('student');
         $student = reset($student);
-        $settings->add(new admin_setting_configselect('enrol_saml/roleid',
-            get_string('defaultrole', 'role'), '', $student->id, $options));
+        $settings->add(
+            new admin_setting_configselect(
+                'enrol_saml/roleid',
+                get_string('defaultrole', 'role'),
+                '',
+                $student->id,
+                $options
+            )
+        );
     }
 }
