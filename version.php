@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 2019061301;
+$plugin->version = 2019071701;
 $plugin->requires = 2017111300;
-$plugin->release = 'enrol/saml version of 13-06-2019';
+$plugin->release = 'enrol/saml version of 16-07-2019';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->component = 'enrol_saml';
