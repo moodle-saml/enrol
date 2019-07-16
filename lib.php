@@ -203,6 +203,11 @@ class enrol_saml_plugin extends enrol_plugin {
         $samlpluginconfig = get_config('auth_saml');
         $enrolpluginconfig = get_config('enrol_saml');
 
+        $prefixes = $enrolpluginconfig->group_prefix;
+        if (!empty($prefixes)) {
+            $prefixes = explode(",", $prefixes);
+        }
+
         global $DB, $SAML_COURSE_INFO, $err;
 
         if ($samlpluginconfig->supportcourses != 'nosupport') {
@@ -270,7 +275,7 @@ class enrol_saml_plugin extends enrol_plugin {
                                             $this->enrol_saml_log_info($user->username.' enrolled in course '.$course->shortname.' with role '.$role, $enrolpluginconfig->logfile);
                                             // Last parameter (status) 0->active  1->suspended.
                                         }
-                                        $this->assign_group($SAML_COURSE_INFO->mapped_courses[$role]['active'][$courseid], $course, $user, $enrolpluginconfig);
+                                        $this->assign_group($SAML_COURSE_INFO->mapped_courses[$role]['active'][$courseid], $course, $user, $enrolpluginconfig, $prefixes);
                                     }
                                 }
                             }
@@ -289,11 +294,27 @@ class enrol_saml_plugin extends enrol_plugin {
         }
     }
 
-    public function assign_group($samlcourseinfo, $course, $user, $enrolpluginconfig) {
+    public function group_matches_prefixes($groupname, $prefixes) {
+        $matches = false;
+        if (isset($groupname) && !empty($prefixes)) {
+            foreach ($prefixes as $prefix) {
+                if (stripos($groupname, $prefix) === 0) {
+                    $matches = true;
+                    break;
+                }
+            }
+        } else {
+            $matches = true;
+        }
+        return $matches;
+    }
+
+    public function assign_group($samlcourseinfo, $course, $user, $enrolpluginconfig, $prefixes) {
         if ($course->groupmode) {
             if (isset($samlcourseinfo['group'])) {
                 $groupname = $samlcourseinfo['group'];
-                if (isset($groupname)) {
+                $matchesprefix = $this->group_matches_prefixes($groupname, $prefixes);
+                if (isset($groupname) && $matchesprefix) {
                     global $CFG;
                     require_once("$CFG->dirroot/group/lib.php");
                     $groupid = groups_get_group_by_name($course->id, $groupname);
@@ -301,7 +322,7 @@ class enrol_saml_plugin extends enrol_plugin {
                         $newgroupdata = new stdClass();
                         $newgroupdata->name = $groupname;
                         $newgroupdata->courseid = $course->id;
-                        $newgroupdata->description = '';
+                        $newgroupdata->description = isset($enrolpluginconfig->created_group_info)? $enrolpluginconfig->created_group_info : '';
                         $groupid = groups_create_group($newgroupdata);
                         $this->enrol_saml_log_info('Group '.$groupname.' created on course '.$course->shortname, $enrolpluginconfig->logfile);
                     }
@@ -312,8 +333,11 @@ class enrol_saml_plugin extends enrol_plugin {
                             $found = true;
                         } else {
                             // Unassign from previous groups
-                            groups_remove_member($group->id, $user->id);
-                            $this->enrol_saml_log_info($user->username.' unassigned from group '.$group->name.' from course '.$course->shortname, $enrolpluginconfig->logfile);
+                            $matchesprefix = $this->group_matches_prefixes($group->name, $prefixes);
+                            if ($matchesprefix) {
+                                groups_remove_member($group->id, $user->id);
+                                $this->enrol_saml_log_info($user->username.' unassigned from group '.$group->name.' from course '.$course->shortname, $enrolpluginconfig->logfile);
+                            }
                         }
                     }
                     if (!$found) {

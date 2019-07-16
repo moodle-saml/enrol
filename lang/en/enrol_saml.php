@@ -48,3 +48,7 @@ $string['wscannotenrol'] = 'SAML plugin instance cannot enrol a user in the cour
 $string['wsnoinstance'] = 'SAML enrolment plugin instance doesn\'t exist or is disabled for the course (id = {$a->courseid})';
 $string['wsusercannotassign'] = 'You don\'t have the permission to assign this role ({$a->roleid}) to this user ({$a->userid}) in this course({$a->courseid}).';
 $string['error_instance_creation'] = 'Exists an inactive instance of this SAML plugin for this course "{$a}", activate it instead create new one';
+$string['group_prefix'] = 'Prefix for managed groups';
+$string['group_prefix_description'] = 'Define a prefix if you want that the extension only manages groups that matches the prefix. Leave it blank to manage all. Multi-valued field comma separated';
+$string['created_group_info'] = 'Description for new groups';
+$string['created_group_info_description'] = 'Set in this field the text that will be used for the description of new groups created by the extension';

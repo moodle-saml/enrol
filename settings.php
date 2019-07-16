@@ -82,6 +82,19 @@ if ($ADMIN->fulltree) {
         )
     );
 
+    require_once($CFG->dirroot.'/enrol/saml/classes/admin_setting_configtext_enrol_trim.php');
+    $title = get_string('group_prefix', 'enrol_saml');
+    $description = get_string('group_prefix_description', 'enrol_saml');
+    $default = '';
+    $setting = new admin_setting_configtext_enrol_trim('enrol_saml/group_prefix', $title, $description, $default, PARAM_RAW);
+    $settings->add($setting);
+
+    $title = get_string('created_group_info', 'enrol_saml');
+    $description = get_string('created_group_info_description', 'enrol_saml');
+    $default = '';
+    $setting = new admin_setting_configtextarea('enrol_saml/created_group_info', $title, $description, $default, PARAM_RAW);
+    $settings->add($setting);
+
     if (!during_initial_install()) {
         $options = get_default_enrol_roles(context_system::instance());
         $student = get_archetype_roles('student');

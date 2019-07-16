@@ -48,3 +48,7 @@ $string['wscannotenrol'] = 'La instancia del plugin de matriculación SAML no pu
 $string['wsnoinstance'] = 'La instancia del plugin de matriculación SAML no existe o está deshabilitado para el curso (id = {$a->courseid})';
 $string['wsusercannotassign'] = 'No tienes permisos para asignar este rol ({$a->roleid}) al usuario ({$a->userid}) en este curso ({$a->courseid}).';
 $string['error_instance_creation'] = 'Existe una instancia inactiva del plugin de SAML para el curso "{$a}", actívala en lugar de crear una instancia nueva';
+$string['group_prefix'] = 'Prefijo para grupos manipulados';
+$string['group_prefix_description'] = 'Define un prefijo si quieres que la extensión únicamente manipule aquellos grupos que tengan dicho prefijo. Deja el campo en blanco para manapular cualquier grupo. Campo multi-valor separados por comas';
+$string['created_group_info'] = 'Descripción para nuevos grupos';
+$string['created_group_info_description'] = 'Establece en este campo el texto que será asociado a la descripción de los grupos creados por la extensión';
